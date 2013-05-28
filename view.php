@@ -29,6 +29,10 @@ require_once("$CFG->dirroot/mod/certificate/deprecatedlib.php");
 require_once("$CFG->dirroot/mod/certificate/lib.php");
 require_once("$CFG->libdir/pdflib.php");
 
+
+
+
+
 $id = required_param('id', PARAM_INT);    // Course Module ID
 $action = optional_param('action', '', PARAM_ALPHA);
 $edit = optional_param('edit', -1, PARAM_BOOL);
@@ -65,6 +69,8 @@ $context = get_context_instance(CONTEXT_MODULE, $cm->id);
 if (($edit != -1) and $PAGE->user_allowed_editing()) {
      $USER->editing = $edit;
 }
+
+
 
 // Add block editing button
 if ($PAGE->user_allowed_editing()) {
@@ -128,16 +134,35 @@ if (empty($action)) { // Not displaying PDF
     } elseif ($certificate->delivery == 2)    {
         $str = get_string('openemail', 'certificate');
     }
-    echo html_writer::tag('p', $str, array('style' => 'text-align:center'));
-    $linkname = get_string('getcertificate', 'certificate');
+    //echo html_writer::tag('p', $str, array('style' => 'text-align:center'));
+    
+    $certID = $cm->id;
+    if ($certID = 25) { // EFFIGY - Check if this is the Forklift Certificate
+        //echo html_writer::tag('p', $certID, array('style' => 'text-align:center')); // Output Certificate ID to see which Certificate is being used
+    	$linkname = get_string('getcertificateforklift', 'certificate');
+    }
+    else {
+    	$linkname = get_string('getcertificate', 'certificate'); 
+    }
+    
     // Add to log, only if we are reissuing
     add_to_log($course->id, 'certificate', 'view', "view.php?id=$cm->id", $certificate->id, $cm->id);
 
     $link = new moodle_url('/mod/certificate/view.php?id='.$cm->id.'&action=get');
     $button = new single_button($link, $linkname);
     $button->add_action(new popup_action('click', $link, 'view'.$cm->id, array('height' => 600, 'width' => 800)));
-
-    echo html_writer::tag('div', $OUTPUT->render($button), array('style' => 'text-align:center'));
+    echo html_writer::tag('div', $OUTPUT->render($button), array('class' => 'certButton', 'style' => 'text-align:center'));
+    
+    // EFFIGY get custom script to show logout button after viewing certificate.
+    require_once("$CFG->dirroot/mod/certificate/js/logoutButton.js");
+    // EFFIGY - Custom Logout text goes here
+    echo html_writer::tag('div', 
+    '<div><h3>Got your Statement of Completion?<h3></div>
+    <div>Your statement was also emailed to the following email address</div>
+    <div>'.$USER->email.'</div>
+    <div class="logoutButton"><a href="'.$CFG->wwwroot.'/login/logout.php?sesskey='.$USER->sesskey.'">Go to Logout Screen</a></div>', 
+    array('id' => 'logoutButton', 'style' => 'text-align:center;display:none;'));
+    
     echo $OUTPUT->footer($course);
     exit;
 } else { // Output to pdf
@@ -157,5 +182,7 @@ if (empty($action)) { // Not displaying PDF
         certificate_email_student($course, $certificate, $certrecord, $context);
         $pdf->Output($filename, 'I'); // open in browser
         $pdf->Output('', 'S'); // send
+        
+       
     }
 }
