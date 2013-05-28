@@ -31,8 +31,6 @@ require_once("$CFG->libdir/pdflib.php");
 
 
 
-
-
 $id = required_param('id', PARAM_INT);    // Course Module ID
 $action = optional_param('action', '', PARAM_ALPHA);
 $edit = optional_param('edit', -1, PARAM_BOOL);
@@ -150,16 +148,18 @@ if (empty($action)) { // Not displaying PDF
 
     $link = new moodle_url('/mod/certificate/view.php?id='.$cm->id.'&action=get');
     $button = new single_button($link, $linkname);
-    $button->add_action(new popup_action('click', $link, 'view'.$cm->id, array('height' => 600, 'width' => 800)));
+    //$button->add_action(new popup_action('click', $link, 'view'.$cm->id, array('height' => 600, 'width' => 800)));
+
     echo html_writer::tag('div', $OUTPUT->render($button), array('class' => 'certButton', 'style' => 'text-align:center'));
     
     // EFFIGY get custom script to show logout button after viewing certificate.
     require_once("$CFG->dirroot/mod/certificate/js/logoutButton.js");
+    
     // EFFIGY - Custom Logout text goes here
     echo html_writer::tag('div', 
-    '<div><h3>Got your Statement of Completion?<h3></div>
-    <div>Your statement was also emailed to the following email address</div>
-    <div>'.$USER->email.'</div>
+    '<div><h3>Got your Statement of Completion?</h3></div>
+    <div>Your statement has been emailed to the following email address</div>
+    <div><strong>'.$USER->email.'</strong></div>
     <div class="logoutButton"><a href="'.$CFG->wwwroot.'/login/logout.php?sesskey='.$USER->sesskey.'">Go to Logout Screen</a></div>', 
     array('id' => 'logoutButton', 'style' => 'text-align:center;display:none;'));
     
@@ -180,7 +180,7 @@ if (empty($action)) { // Not displaying PDF
         $pdf->Output($filename, 'D'); // force download when create
     } elseif ($certificate->delivery == 2) {
         certificate_email_student($course, $certificate, $certrecord, $context);
-        $pdf->Output($filename, 'I'); // open in browser
+        $pdf->Output($filename, 'D'); // open in browser
         $pdf->Output('', 'S'); // send
         
        

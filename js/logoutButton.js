@@ -3,7 +3,7 @@ YUI().use('transition', 'button-plugin', 'cssbutton', function(Y){
     
     // An event button, listening for a click
     var eventButton = Y.Plugin.Button.createNode({
-        srcNode:'input[id*="single_button"]'
+        srcNode:'input[value*="Acknowledge"]'
     });
     
     eventButton.on('click', function(){
